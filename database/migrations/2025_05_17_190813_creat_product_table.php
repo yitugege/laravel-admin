@@ -16,7 +16,7 @@ return new class extends Migration
             $table->enum('type', ['simple', 'variable', 'variation'])->comment('产品类型');
             $table->unsignedBigInteger('parent_id')->nullable()->comment('父级id');
             $table->string('name')->nullable()->comment('产品名称');
-            $table->string('status')->default('publish')->comment('产品状态');
+            $table->enum('status', ['publish', 'draft', 'pending'])->default('publish')->comment('产品状态');
             $table->boolean('featured')->default(false)->comment('是否推荐');
             $table->LONGTEXT('description')->nullable()->comment('产品描述');
             $table->text('short_description')->nullable()->comment('产品短描述');
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->decimal('sale_price', 10, 2)->nullable()->comment('销售价');
             $table->json('meta_data')->nullable()->comment('产品元数据');
             $table->integer('stock_quantity')->nullable()->comment('库存数量');
-            $table->string('stock_status')->default('instock')->comment('库存状态');
+            $table->enum('stock_status', ['instock', 'outofstock', 'onbackorder'])->default('instock')->comment('库存状态');
             $table->unsignedBigInteger('category_id')->nullable()->comment('产品分类');
             $table->json('tags')->nullable()->comment('产品标签');
             $table->json('images')->nullable()->comment('产品图片');
