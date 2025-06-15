@@ -8,6 +8,7 @@ use App\Jobs\Woocommerce\SyncBatchJob;
 use Automattic\WooCommerce\Client;
 use App\Models\Platform;
 
+
 class SyncService
 {
     protected $woocommerce;
@@ -53,7 +54,9 @@ class SyncService
                 $platform->consumer_secret,
                 [
                     'timeout' => 60,
-                    'ssl_verify' => false,
+                    'ssl_verify' => false
+
+
                 ]
             );
         } catch (\Exception $e) {
@@ -88,7 +91,7 @@ class SyncService
     public function syncProducts()
     {
         $page = 1;
-        $batchId = $this->batchId . '_product_sync_';
+        $batchId = $this->batchId . '_product_sync_' . uniqid();
         $jobs = [];
         $this->successCount = 0;
         $this->errorCount = 0;
@@ -100,18 +103,27 @@ class SyncService
         Log::info('开始同步产品');
 
         try {
-            do {
-                $products = $this->woocommerce->get('products', [
-                    'per_page' => $this->batchSize,
-                    'page' => $page
-                ]);
+            //先获取第一页的数据用来获取总页数
+            $products = $this->woocommerce->get('products', [
+                'per_page' => $this->batchSize,
+                'page' => $page,
+            ]);
 
-                if (!empty($products)) {
-                    $products = is_object($products) ? [$products] : (array)$products;
-                    $jobs[] = new SyncBatchJob('product', $products, $batchId);
-                }
-                $page++;
-            } while (!empty($products));
+            // 使用正确的方式获取总页数
+            $totalPages = $this->woocommerce->http->getResponse()->getHeaders()['X-WP-TotalPages'] ?? 1;
+            Log::info('获取到总页数', ['total_pages' => $totalPages]);
+
+            $products = is_object($products) ? [$products] : (array)$products;
+            $jobs = [];
+            for ($page = 1; $page <= $totalPages; $page++) {
+                $jobs[] = new SyncBatchJob(
+                    'product',
+                    $products,
+                    $page,
+                    $batchId
+                );
+            }
+
 
             if (!empty($jobs)) {
                 $startTime = $this->timeStart;
@@ -120,7 +132,7 @@ class SyncService
                     ->allowFailures()
                     ->onConnection('redis')
                     ->onQueue('sync')
-                    ->then(function () use ($batchId, $startTime,) {
+                    ->then(function () use ($batchId, $startTime) {
                         $endTime = microtime(true);
                         $timeCost = $endTime - $startTime;
 
@@ -146,6 +158,8 @@ class SyncService
             throw $e;
         }
     }
+
+
 
     /**
      * 批量同步订单

@@ -60,9 +60,9 @@ class HandleProductSync implements ShouldQueue
                 'description' => $wcProduct->description ?? '',
                 'short_description' => $wcProduct->short_description ?? '',
                 'sku' => $wcProduct->sku,
-                'price' => $this->parsePrice($wcProduct->price),
-                'regular_price' => $this->parsePrice($wcProduct->regular_price),
-                'sale_price' => $this->parsePrice($wcProduct->sale_price),
+                'price' => $this->parsePrice($wcProduct->price) ?? 0,
+                'regular_price' => $this->parsePrice($wcProduct->regular_price) ?? 0,
+                'sale_price' => $this->parsePrice($wcProduct->sale_price) ?? 0,
                 'stock_quantity' => $wcProduct->stock_quantity,
                 'stock_status' => $wcProduct->stock_status,
                 'tags' => collect($wcProduct->tags ?? [])->map(fn($tag) => [
@@ -118,10 +118,20 @@ class HandleProductSync implements ShouldQueue
             }
 
             // 同步主产品
-            $product = Product::updateOrCreate(
-                ['woocommerce_id' => $wcProduct->id],
-                $productData
-            );
+            try {
+                $product = Product::updateOrCreate(
+                    ['woocommerce_id' => $wcProduct->id],
+                    $productData
+                );
+            } catch (\Exception $e) {
+                Log::error('产品同步失败', [
+                    'product_id' => $wcProduct->id,
+                    'sku' => $wcProduct->sku,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                throw $e;
+            }
             if ($product->wasRecentlyCreated) {
                 $this->syncService->successCount++;
             } else {

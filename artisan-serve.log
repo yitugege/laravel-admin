@@ -1,0 +1,23 @@
+nohup: ignoring input
+
+   INFO  Server running on [http://0.0.0.0:8000].  
+
+  Press Ctrl+C to stop the server
+
+  2025-06-14 21:22:47 /api/woocommerce/products/sync ............. ~ 500.33ms
+  2025-06-14 21:26:48 /api/woocommerce/products/sync ............. ~ 500.35ms
+
+   INFO  Environment modified. Restarting server...  
+
+   INFO  Server running on [http://0.0.0.0:8000].  
+
+  Press Ctrl+C to stop the server
+
+  2025-06-14 21:29:35 /api/woocommerce/products/sync ................... ~ 1s
+
+   INFO  Environment modified. Restarting server...  
+
+   INFO  Server running on [http://0.0.0.0:8000].  
+
+  Press Ctrl+C to stop the server
+

@@ -15,7 +15,7 @@ use App\Events\Woocommerce\OrderSyncEvent;
 
 class SyncBatchJob implements ShouldQueue
 {
-    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable, InteractsWithQueue, Queueable;
 
     protected $syncType;
     protected $items;
@@ -32,6 +32,8 @@ class SyncBatchJob implements ShouldQueue
         $this->batchId = $batchId;
         $this->onConnection('redis');
         $this->onQueue('sync');
+        //异步执行同步产品,避免阻塞队列
+       // $this->dispatch();
     }
 
     /**

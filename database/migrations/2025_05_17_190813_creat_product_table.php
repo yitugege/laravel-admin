@@ -16,7 +16,7 @@ return new class extends Migration
             $table->enum('type', ['simple', 'variable', 'variation'])->comment('产品类型');
             $table->unsignedBigInteger('parent_id')->nullable()->comment('父级id');
             $table->string('name')->nullable()->comment('产品名称');
-            $table->enum('status', ['publish', 'draft', 'pending'])->default('publish')->comment('产品状态');
+            $table->enum('status', ['publish', 'draft', 'pending', 'private'])->default('publish')->comment('产品状态');
             $table->boolean('featured')->default(false)->comment('是否推荐');
             $table->LONGTEXT('description')->nullable()->comment('产品描述');
             $table->text('short_description')->nullable()->comment('产品短描述');
